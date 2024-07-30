@@ -1,7 +1,7 @@
-<html><head><base href="https://servicenow.accounting.app/bonds-dashboard%20now,%20wipe%20everything,%20can%20you%20give%20me%20a%20live%20integration%20of%20real%20stock%20transaction%20of%20ServiceNow%20it%20needs%20to%20be%20a%20real%20time%20stock%20ticker%20for%20NOW,%20browse%20the%20web%20to%20find%20data%20for%20NYSE:%20NOW.%20I%20attached%20a%20screenshot%20of%20How%20it%20should%20look%20like.%20This%20is%20almost%20perfect,%20but%20theres%20a%20bug%20when%20it%20ticks,%20the%20line%20chart%20shows%20a%20straight%20line,%20also%20can%20you%20add%20some%20color%20to%20the%20chart%20when%20it%20grows%20its%20green%20with%20some%20shadow%20fading%20and%20if%20it%20drops%20it%20turns%20red.%20When%20it%20ticks,%20the%20graphs%20bugs%20with%20a%20straight%20line%20across,%20can%20it%20be%20continuous?%20and%20also%20add%20a%20few%20tabs%20up%20top%20like%20News,%20Ideas,%20Financials,%20where%20its%20clickable%20and%20has%20information%20inside.%20the%20graph%20data%20looks%20really%20weird%20right%20now,%20it%20should%20be%20like%20how%20the%20real%20stock%20market%20behaves">
+<html><head><base href="https://servicenow.accounting.app/bonds-dashboard%20now,%20wipe%20everything,%20can%20you%20give%20me%20a%20live%20integration%20of%20real%20stock%20transaction%20of%20ServiceNow%20it%20needs%20to%20be%20a%20real%20time%20stock%20ticker%20for%20NOW,%20browse%20the%20web%20to%20find%20data%20for%20NYSE:%20NOW.%20I%20attached%20a%20screenshot%20of%20How%20it%20should%20look%20like.%20This%20is%20almost%20perfect,%20but%20theres%20a%20bug%20when%20it%20ticks,%20the%20line%20chart%20shows%20a%20straight%20line,%20also%20can%20you%20add%20some%20color%20to%20the%20chart%20when%20it%20grows%20its%20green%20with%20some%20shadow%20fading%20and%20if%20it%20drops%20it%20turns%20red.%20When%20it%20ticks,%20the%20graphs%20bugs%20with%20a%20straight%20line%20across,%20can%20it%20be%20continuous?%20and%20also%20add%20a%20few%20tabs%20up%20top%20like%20News,%20Ideas,%20Financials,%20where%20its%20clickable%20and%20has%20information%20inside.%20the%20graph%20data%20looks%20really%20weird%20right%20now,%20it%20should%20be%20like%20how%20the%20real%20stock%20market%20behaves.%20Make%20the%20graph%20static%20but%20still%20clickable%20and%20hoverable.%20so%20the%201M,%201D,%20etc%20are%20still%20clickable%20and%20showing%20the%20graph%20in%20different%20times,%20it%20should%20still%20have%20many%20data%20points%20like%20a%20real%20market">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ServiceNow (NOW) Real-Time Stock Ticker</title>
+    <title>ServiceNow (NOW) Stock Ticker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
@@ -23,8 +23,8 @@
             margin-bottom: 20px;
         }
         .stock-logo {
-            width: 36px;
-            height: 36px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             margin-right: 15px;
         }
@@ -75,12 +75,6 @@
             background-color: #2962ff;
             color: white;
         }
-        #lastUpdated {
-            font-size: 12px;
-            color: #787b86;
-            text-align: right;
-            margin-top: 10px;
-        }
         .tabs {
             display: flex;
             margin-bottom: 20px;
@@ -128,10 +122,8 @@
         <div id="chartTab" class="tab-content active">
             <div class="time-buttons">
                 <button class="time-button active" data-time="1D">1D</button>
-                <button class="time-button" data-time="5D">5D</button>
                 <button class="time-button" data-time="1M">1M</button>
-                <button class="time-button" data-time="6M">6M</button>
-                <button class="time-button" data-time="YTD">YTD</button>
+                <button class="time-button" data-time="3M">3M</button>
                 <button class="time-button" data-time="1Y">1Y</button>
                 <button class="time-button" data-time="5Y">5Y</button>
                 <button class="time-button" data-time="ALL">ALL</button>
@@ -139,7 +131,6 @@
             <div class="chart-container">
                 <canvas id="stockChart"></canvas>
             </div>
-            <div id="lastUpdated"></div>
         </div>
         
         <div id="overviewTab" class="tab-content">
@@ -150,7 +141,7 @@
         <div id="newsTab" class="tab-content">
             <h3>Latest News</h3>
             <ul>
-                <li>ServiceNow Announces Q2 Earnings Beat</li>
+                <li>ServiceNow Announces Strong Q2 Earnings</li>
                 <li>New AI Features Added to NOW Platform</li>
                 <li>ServiceNow Partners with Major Tech Firm for Cloud Integration</li>
             </ul>
@@ -177,16 +168,79 @@
     <script>
         const ctx = document.getElementById('stockChart').getContext('2d');
         let chart;
-        let chartData = [];
 
-        function initChart() {
+        function generateRealisticData(timeFrame) {
+            let data = [];
+            let basePrice = 792.25;
+            let volatility;
+            let dataPoints;
+            let startDate = new Date();
+
+            switch(timeFrame) {
+                case '1D':
+                    volatility = 0.005;
+                    dataPoints = 390; // 1 minute intervals for 6.5 hours
+                    startDate.setHours(9, 30, 0, 0);
+                    break;
+                case '1M':
+                    volatility = 0.01;
+                    dataPoints = 22 * 7; // Hourly data for about 22 trading days
+                    startDate.setDate(startDate.getDate() - 30);
+                    break;
+                case '3M':
+                    volatility = 0.02;
+                    dataPoints = 66 * 2; // 2 data points per day for about 66 trading days
+                    startDate.setDate(startDate.getDate() - 90);
+                    break;
+                case '1Y':
+                    volatility = 0.03;
+                    dataPoints = 252; // Daily data for about 252 trading days
+                    startDate.setFullYear(startDate.getFullYear() - 1);
+                    break;
+                case '5Y':
+                    volatility = 0.05;
+                    dataPoints = 252 * 5; // Daily data for 5 years
+                    startDate.setFullYear(startDate.getFullYear() - 5);
+                    break;
+                case 'ALL':
+                    volatility = 0.1;
+                    dataPoints = 252 * 10; // Daily data for 10 years (approximate)
+                    startDate.setFullYear(startDate.getFullYear() - 10);
+                    break;
+            }
+
+            for (let i = 0; i < dataPoints; i++) {
+                let change = basePrice * volatility * (Math.random() - 0.5);
+                basePrice += change;
+                if (basePrice < 0) basePrice = 0; // Ensure price doesn't go negative
+                
+                let date = new Date(startDate);
+                if (timeFrame === '1D') {
+                    date.setMinutes(date.getMinutes() + i);
+                } else {
+                    date.setDate(date.getDate() + i);
+                }
+                
+                data.push({x: date, y: basePrice});
+            }
+
+            return data;
+        }
+
+        function initChart(timeFrame) {
+            const data = generateRealisticData(timeFrame);
+
+            if (chart) {
+                chart.destroy();
+            }
+
             chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     datasets: [{
                         label: 'Stock Price',
-                        data: [],
-                        borderColor: '#2962ff',
+                        data: data,
+                        borderColor: data[data.length - 1].y >= data[0].y ? '#089981' : '#f23645',
                         backgroundColor: ctx.createLinearGradient(0, 0, 0, 400),
                         fill: true,
                         pointRadius: 0,
@@ -197,17 +251,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: {
-                        duration: 0
-                    },
                     scales: {
                         x: {
                             type: 'time',
                             time: {
-                                unit: 'hour',
-                                displayFormats: {
-                                    hour: 'HH:mm'
-                                }
+                                unit: timeFrame === '1D' ? 'hour' : 'day'
                             },
                             ticks: {
                                 maxRotation: 0,
@@ -237,12 +285,8 @@
                     }
                 }
             });
-        }
 
-        function updateChart(data) {
-            chart.data.datasets[0].data = data;
             updateChartColor(data);
-            chart.update('none');
         }
 
         function updateChartColor(data) {
@@ -261,120 +305,19 @@
                 chart.data.datasets[0].borderColor = '#f23645';
             }
             chart.data.datasets[0].backgroundColor = gradient;
+            chart.update();
         }
 
-        function generateRealisticStockData(timeFrame) {
-            const now = new Date();
-            const data = [];
-            let price = 792.25;
-            let timeDelta;
-            let dataPoints;
-            let volatility;
+        initChart('1D');
 
-            switch(timeFrame) {
-                case '1D':
-                    timeDelta = 5 * 60 * 1000; // 5 minutes
-                    dataPoints = 78; // 6.5 hours of trading
-                    volatility = 0.001;
-                    break;
-                case '5D':
-                    timeDelta = 30 * 60 * 1000; // 30 minutes
-                    dataPoints = 5 * 13; // 5 days of trading
-                    volatility = 0.002;
-                    break;
-                case '1M':
-                    timeDelta = 24 * 60 * 60 * 1000; // 1 day
-                    dataPoints = 22; // ~22 trading days in a month
-                    volatility = 0.005;
-                    break;
-                case '6M':
-                    timeDelta = 24 * 60 * 60 * 1000; // 1 day
-                    dataPoints = 126; // ~126 trading days in 6 months
-                    volatility = 0.01;
-                    break;
-                case 'YTD':
-                    timeDelta = 24 * 60 * 60 * 1000; // 1 day
-                    dataPoints = Math.floor((now - new Date(now.getFullYear(), 0, 1)) / (24 * 60 * 60 * 1000));
-                    volatility = 0.015;
-                    break;
-                case '1Y':
-                    timeDelta = 24 * 60 * 60 * 1000; // 1 day
-                    dataPoints = 252; // ~252 trading days in a year
-                    volatility = 0.02;
-                    break;
-                case '5Y':
-                    timeDelta = 7 * 24 * 60 * 60 * 1000; // 1 week
-                    dataPoints = 5 * 52; // 5 years
-                    volatility = 0.03;
-                    break;
-                case 'ALL':
-                    timeDelta = 30 * 24 * 60 * 60 * 1000; // ~1 month
-                    dataPoints = 12 * 16; // ServiceNow IPO was in 2012
-                    volatility = 0.05;
-                    break;
-                default:
-                    timeDelta = 5 * 60 * 1000;
-                    dataPoints = 78;
-                    volatility = 0.001;
-            }
-
-            for (let i = dataPoints - 1; i >= 0; i--) {
-                const change = price * volatility * (Math.random() - 0.5);
-                price += change;
-                if (price < 0) price = 0; // Ensure price doesn't go negative
-                data.unshift({
-                    x: new Date(now - i * timeDelta),
-                    y: price
-                });
-            }
-
-            return data;
-        }
-
-        function updateTimeFrame(timeFrame) {
-            chartData = generateRealisticStockData(timeFrame);
-            updateChart(chartData);
-        }
-
+        // Time button functionality
         document.querySelectorAll('.time-button').forEach(button => {
-            button.addEventListener('click', (e) => {
+            button.addEventListener('click', () => {
                 document.querySelector('.time-button.active').classList.remove('active');
-                e.target.classList.add('active');
-                updateTimeFrame(e.target.dataset.time);
+                button.classList.add('active');
+                initChart(button.dataset.time);
             });
         });
-
-        function updateLastUpdated() {
-            const now = new Date();
-            document.getElementById('lastUpdated').textContent = `Last updated: ${now.toLocaleTimeString()}`;
-        }
-
-        initChart();
-        updateTimeFrame('1D');
-        updateLastUpdated();
-
-        // Simulating real-time updates for the price only
-        setInterval(() => {
-            const currentPrice = parseFloat(document.getElementById('currentPrice').textContent.slice(1));
-            const newPrice = currentPrice + (Math.random() - 0.5) * 2;
-            const priceChange = newPrice - 792.25;
-            const percentChange = (priceChange / 792.25) * 100;
-
-            document.getElementById('currentPrice').textContent = `$${newPrice.toFixed(2)}`;
-            const changeElement = document.getElementById('priceChange');
-            changeElement.textContent = `${priceChange >= 0 ? '+' : ''}$${priceChange.toFixed(2)} (${percentChange.toFixed(2)}%)`;
-            changeElement.className = `stock-change ${priceChange >= 0 ? 'positive-change' : 'negative-change'}`;
-
-            // Update the chart with the new price
-            const now = new Date();
-            chartData.push({x: now, y: newPrice});
-            if (chartData.length > 78) { // For 1D view
-                chartData.shift();
-            }
-            updateChart(chartData);
-
-            updateLastUpdated();
-        }, 5000);
 
         // Tab functionality
         document.querySelectorAll('.tab').forEach(tab => {
